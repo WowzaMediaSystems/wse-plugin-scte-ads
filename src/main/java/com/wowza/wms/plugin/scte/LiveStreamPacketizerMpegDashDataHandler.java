@@ -72,23 +72,28 @@ public class LiveStreamPacketizerMpegDashDataHandler extends LiveStreamPacketize
             {
                 AMFDataObj eventObj = commandObj.getObject("event");
                 long eventId = eventObj.getLong("eventID");
-
+                boolean spliceOut = eventObj.getBoolean("outOfNetwork");
+                
                 if (eventStream.getRegisteredEventStream(eventId) != null)
                     return;
-                events.computeIfAbsent(eventId, id -> {
-                    AMFDataObj spliceTimeObj = eventObj.getObject("spliceTime");
-                    long spliceTime = spliceTimeObj.getLong("spliceTime");
-                    boolean isUTC = spliceTimeObj.getBoolean("isUTC");
-                    if (!isUTC && spliceTimeObj.containsKey("spliceTimeMS"))
-                        spliceTime = spliceTimeObj.getLong("spliceTimeMS") * 90;
-                    long presentationTime = spliceTime;
-                    if (presentationTime == -1)
-                        return null;
-                    long duration = -1;
-                    if (eventObj.getBoolean("durationFlag") && eventObj.containsKey("breakDuration"))
-                        duration = (long) eventObj.getDouble("breakDuration");
-                    return new OnDashDataEvent(eventId, rawData, presentationTime, duration);
-                });
+
+                if (spliceOut)
+                {
+                    OnDashDataEvent event = events.computeIfAbsent(eventId, id -> {
+                        AMFDataObj spliceTimeObj = eventObj.getObject("spliceTime");
+                        long spliceTime = spliceTimeObj.getLong("spliceTime");
+                        boolean isUTC = spliceTimeObj.getBoolean("isUTC");
+                        long presentationTime = -1;
+                        if (!isUTC && spliceTimeObj.containsKey("spliceTimeMS"))
+                            spliceTime = spliceTimeObj.getLong("spliceTimeMS") * 90;
+                            presentationTime = spliceTime;
+                        long duration = -1;
+                        if (eventObj.getBoolean("durationFlag") && eventObj.containsKey("breakDuration"))
+                            duration = (long) eventObj.getDouble("breakDuration");
+                        OnDashDataEvent newEvent = new OnDashDataEvent(eventId, rawData, presentationTime, duration);
+                        return newEvent;
+                    });
+                }
             }
         });
     }

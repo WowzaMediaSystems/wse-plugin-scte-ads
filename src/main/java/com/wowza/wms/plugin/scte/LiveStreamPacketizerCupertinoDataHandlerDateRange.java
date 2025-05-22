@@ -90,7 +90,7 @@ public class LiveStreamPacketizerCupertinoDataHandlerDateRange extends LiveStrea
             // first chunk for event
             if (event.startTime >= chunk.getStartTimecode() && event.startTime < timecode) 
 			{
-				String durationString = event.duration == 0 ? "" : ((includeEndTag ? ",PLANNED-" : ",") + String.format("DURATION=%.3f", event.duration / 1000f));
+				String durationString = event.duration == 0 ? "" : ((includeEndTag ? ",PLANNED-" : ",") + String.format("DURATION=%.3f", event.duration / 1f));
 				String dateRangeString = "EXT-X-DATERANGE:" + idString + startString + durationString;
 				if(includeSCTEData && event.spliceOutData != null)
 					dateRangeString += ",SCTE35-OUT=" + event.spliceOutData;
@@ -109,7 +109,7 @@ public class LiveStreamPacketizerCupertinoDataHandlerDateRange extends LiveStrea
 					if(includeEndDateInEndTag)
 						dateString += ",END-DATE=\"" + dateTimeFormatter.format(Instant.ofEpochMilli(streamStartTime + event.startTime + event.duration)) + "\"";
 					
-					String durationString = event.duration == 0 ? "" : String.format(",DURATION=%.3f", event.duration / 1000f);
+					String durationString = event.duration == 0 ? "" : String.format(",DURATION=%.3f", event.duration / 1f);
 					String dateRangeString = "EXT-X-DATERANGE:" + idString + dateString + durationString;
 	
 					if(includeSCTEData && event.spliceInData != null)
