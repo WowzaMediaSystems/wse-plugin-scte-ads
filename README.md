@@ -1,5 +1,5 @@
-# Wowza SSAI Add Insertion Module
-The **SCTE35 add insertion** module for [Wowza Streaming Engine™ media server software](https://www.wowza.com/products/streaming-engine) can be used to intercept SCTE-35 splice events in an incoming MPEG-TS stream for the purpose of creating an HLS playlist or MPEG-DASH manifest with Server-Side Ad Insertion (SSAI) tags. SSAI providers, such as AWS Elemental MediaTailor, can detect this ad-signaling metadata to stitch ads into a live stream on a per-user basis without requiring player-side logic for ad decisions.
+# Wowza SCTE-35 Add Insertion Module
+The **SCTE-35 Add Insertion Module** for [Wowza Streaming Engine™ media server software](https://www.wowza.com/products/streaming-engine) can be used to intercept SCTE-35 splice events in an incoming MPEG-TS stream for the purpose of creating an HLS playlist or MPEG-DASH manifest with Server-Side Ad Insertion (SSAI) tags. SSAI providers, such as AWS Elemental MediaTailor, can detect this ad-signaling metadata to stitch ads into a live stream on a per-user basis without requiring player-side logic for ad decisions.
 
 ## Prerequisites
 * Wowza Streaming Engine™ 4.8.26 or later is required.
