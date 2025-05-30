@@ -1,0 +1,85 @@
+plugins {
+    id 'java-library'
+    id 'com.gorylenko.gradle-git-properties' version '2.4.1'
+}
+
+group 'com.wowza.wms.plugin.scte'
+version '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs "$wseLibDir"
+    }
+}
+
+dependencies {
+    compileOnly 'com.wowza.wms:wms-server:4.8.26'
+    compileOnly'com.wowza.wms:wms-httpstreamer-cupertinostreaming:4.8.26'
+    compileOnly 'com.wowza.wms:wms-httpstreamer-mpegdashstreaming:4.8.26'
+    compileOnly 'org.apache.logging.log4j:log4j-core:2.17.2'
+    compileOnly 'org.apache.logging.log4j:log4j-api:2.17.2'
+    testCompileOnly 'com.wowza.wms:wms-server:4.8.26'
+    testCompileOnly 'com.wowza.wms:wms-httpstreamer-mpegdashstreaming:4.8.26'
+}
+
+gitProperties {
+    extProperty = 'gitProps'
+    dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+    dateFormatTimeZone = 'UTC'
+}
+
+generateGitProperties.outputs.upToDateWhen { false }
+
+tasks.register('generateReleaseInfo') {
+    dependsOn generateGitProperties
+    group = "build"
+    Provider<Directory> outputDir = layout.buildDirectory.dir('generated/java') as Provider<Directory>
+    outputs.dir outputDir.get().asFile.absolutePath
+    doLast {
+        def packageDotPath = "${project.group}"
+        def packagePath = packageDotPath.replaceAll('\\.', '/')
+        Directory dir = outputDir.get().dir(packagePath)
+        dir.asFile.mkdirs()
+        dir.file("ReleaseInfo.java").asFile.text =
+                """|package $packageDotPath;
+                   |public class ReleaseInfo {
+                   |    public static String getProject() { return "${projectName}"; }
+                   |    public static String getVersion() { return "${project.version}"; }
+                   |    public static String getBuildComitDate() { return "${-> project.ext.gitProps['git.commit.time']}"; }
+                   |    public static String getBuildNumber() { return "${-> project.ext.gitProps['git.commit.id.abbrev']}"; }
+                   |}""".stripMargin()
+    }
+}
+
+sourceSets.main.java.srcDir generateReleaseInfo
+clean.finalizedBy generateReleaseInfo
+compileJava.dependsOn generateReleaseInfo
+
+tasks.withType(Jar).configureEach {
+    manifest {
+        attributes(
+                'Gradle-Version'        : "Gradle ${gradle.gradleVersion}",
+                'Created-By'      		: "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+                'Name'                  : "${project.name}",
+                'Build-Version'	        : "${project.version}",
+                'Build-Timestamp'    	: "${-> project.ext.gitProps['git.commit.time']}",
+                'Build-Revision'        : "${-> project.ext.gitProps['git.commit.id.abbrev']}",
+        )
+    }
+    exclude('git.properties')
+    metaInf {
+        from files('LICENSE.txt')
+    }
+    archiveBaseName = 'wse-plugin-' + projectName
+}
+
+test {
+    useJUnitPlatform()
+}
