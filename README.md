@@ -17,7 +17,7 @@ Refer to the guide in the [Resources](#resources) section for detailed instructi
 
 ## Resources
 For full install instructions and to use the compiled version of these modules, see the following article:
-* [Insert ad markers for SSAI delivery with a Wowza Streaming Engine live stream](#)
+* [Insert ad markers for SSAI delivery with a Wowza Streaming Engine live stream](https://www.wowza.com/docs/insert-ad-markers-for-ssai-delivery-with-a-wowza-streaming-engine-live-stream)
 
 Wowza Media Systems™ provides developers with a platform to create streaming applications and solutions. See [Wowza Developer Tools](https://www.wowza.com/developer) to learn more about our APIs and SDK.
 
