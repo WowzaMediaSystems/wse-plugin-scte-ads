@@ -42,12 +42,16 @@ public abstract class LiveStreamPacketizerCupertinoDataHandler extends LiveStrea
     public void onFillChunkStart(LiveStreamPacketizerCupertinoChunk chunk)
     {
         // common PDT code for all implementations
-        if (streamStartTime == -1)
-            streamStartTime = stream.getElapsedTime().getDate().getTime();
         int rendition = chunk.getRendition().getRendition();
         long chunkStartTime = chunk.getStartTimecode();
         if (tcOffsets[rendition - 1] == -1)
+        {
             tcOffsets[rendition - 1] = chunkStartTime;
+            streamStartTime = stream.getElapsedTime().getDate().getTime();
+            logger.info(String.format("%s.onFillChunkStart [%s] rendition: %s, chunkStartTime: %d, streamStartTime: %d",
+                    getClass().getSimpleName(), stream.getContextStr(), chunk.getRendition(), chunkStartTime, streamStartTime));
+        }
+
         Instant pdt = Instant.ofEpochMilli(streamStartTime + (chunkStartTime - tcOffsets[rendition - 1]));
         Instant now = Instant.now();
         Duration diff = Duration.between(pdt, now);
