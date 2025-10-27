@@ -84,9 +84,10 @@ public class LiveStreamPacketizerCupertinoDataHandlerDateRange extends LiveStrea
 	public void onFillChunkEnd(LiveStreamPacketizerCupertinoChunk chunk, long timecode) {
 
 		CupertinoUserManifestHeaders chunkHeaders = chunk.getUserManifestHeaders();
+		int rendition = chunk.getRendition().getRendition();
 		events.forEach((id, event) -> { 
 			String idString = String.format("ID=\"%d\"", event.eventId);
-			String startString = ",START-DATE=\"" + dateTimeFormatter.format(Instant.ofEpochMilli(streamStartTime + event.startTime)) + "\"";
+			String startString = ",START-DATE=\"" + dateTimeFormatter.format(Instant.ofEpochMilli(streamStartTime + (event.startTime - tcOffsets[rendition - 1]))) + "\"";
             // first chunk for event
             if (event.startTime >= chunk.getStartTimecode() && event.startTime < timecode) 
 			{
@@ -107,7 +108,7 @@ public class LiveStreamPacketizerCupertinoDataHandlerDateRange extends LiveStrea
 						dateString = startString;
 					
 					if(includeEndDateInEndTag)
-						dateString += ",END-DATE=\"" + dateTimeFormatter.format(Instant.ofEpochMilli(streamStartTime + event.startTime + event.duration)) + "\"";
+						dateString += ",END-DATE=\"" + dateTimeFormatter.format(Instant.ofEpochMilli(streamStartTime + ((event.startTime + event.duration) - tcOffsets[rendition - 1]))) + "\"";
 					
 					String durationString = event.duration == 0 ? "" : String.format(",DURATION=%.3f", event.duration / 1000d);
 					String dateRangeString = "EXT-X-DATERANGE:" + idString + dateString + durationString;

@@ -22,8 +22,7 @@ public abstract class LiveStreamPacketizerCupertinoDataHandler extends LiveStrea
 {
     protected final LiveStreamPacketizerCupertino liveStreamPacketizer;
 
-    protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME.withZone(ZoneId.of("GMT")).withLocale(Locale.US);
-
+    protected final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneId.of("UTC"));
 
     protected long streamStartTime = -1;
     protected long[] tcOffsets = {-1, -1, -1, -1};
