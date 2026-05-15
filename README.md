@@ -12,8 +12,8 @@ Refer to the guide in the [Resources](#resources) section for detailed instructi
 
 ## Build instructions
 * Clone repo to local filesystem.
-* Update `wseLibDir` variable in the `gradle.properties` file to point to local _Wowza Streaming Engine_ `lib` folder (`[install-dir]/lib`).
-* Run `./gradlew build` to build the jar file.
+* Run `./build.sh` to build the jar file using a docker container.
+* Copy the jar file to the lib folder of your Wowza Streaming Engine installation directory (`[install-dir]/lib`).
 
 ## Resources
 For full install instructions and to use the compiled version of these modules, see the following article:
