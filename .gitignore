@@ -18,3 +18,4 @@ gradle-app.setting
 debug/logs
 debug/tmp
 /.idea/
+CLAUDE.local.md

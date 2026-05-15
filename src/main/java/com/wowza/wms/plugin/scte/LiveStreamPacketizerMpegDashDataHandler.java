@@ -86,7 +86,8 @@ public class LiveStreamPacketizerMpegDashDataHandler extends LiveStreamPacketize
                         long presentationTime = -1;
                         if (!isUTC && spliceTimeObj.containsKey("spliceTimeMS"))
                             spliceTime = spliceTimeObj.getLong("spliceTimeMS") * 90;
-                            presentationTime = spliceTime;
+                        spliceTime += data.getLong("ptsAdjustment");
+                        presentationTime = spliceTime;
                         long duration = -1;
                         if (eventObj.getBoolean("durationFlag") && eventObj.containsKey("breakDuration"))
                             duration = (long) eventObj.getDouble("breakDuration");
