@@ -46,12 +46,13 @@ public class LiveStreamPacketizerCupertinoDataHandlerDateRange extends LiveStrea
 				AMFDataObj eventObj = commandObj.getObject("event");
 				long eventId = eventObj.getLong("eventID");
 				boolean spliceOut = eventObj.getBoolean("outOfNetwork");
-				if (spliceOut) 
+				long ptsAdjustmentMs = data.getLong("ptsAdjustment") / 90;
+				if (spliceOut)
 				{
 					events.computeIfAbsent(eventId, id -> {
 						currentEventId.set(id);
 						AMFDataObj spliceTimeObj = eventObj.getObject("spliceTime");
-						long spliceTimecode = spliceTimeObj.getLong("spliceTimeMS");
+						long spliceTimecode = spliceTimeObj.getLong("spliceTimeMS") + ptsAdjustmentMs;
 						boolean durationFlag = eventObj.getBoolean("durationFlag");
 						long breakDuration = durationFlag ? (long) (eventObj.getDouble("breakDuration") / 90) : 0L;
 						OnDataEvent newEvent = new OnDataEvent(id);
@@ -66,7 +67,7 @@ public class LiveStreamPacketizerCupertinoDataHandlerDateRange extends LiveStrea
 				{
 					events.computeIfPresent(currentEventId.get(), (id, event) -> {
 						AMFDataObj spliceTimeObj = eventObj.getObject("spliceTime");
-						long spliceTimecode = spliceTimeObj.getLong("spliceTimeMS");
+						long spliceTimecode = spliceTimeObj.getLong("spliceTimeMS") + ptsAdjustmentMs;
 						long breakDuration =  spliceTimecode - event.startTime;
 						if (breakDuration > 0) 
 							event.duration = breakDuration;

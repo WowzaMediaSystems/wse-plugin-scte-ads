@@ -34,7 +34,7 @@ public class LiveStreamPacketizerCupertinoDataHandlerCue extends LiveStreamPacke
                     if (!spliceOut)
                         return null;
                     AMFDataObj spliceTimeObj = eventObj.getObject("spliceTime");
-                    long spliceTimecode = spliceTimeObj.getLong("spliceTimeMS");
+                    long spliceTimecode = spliceTimeObj.getLong("spliceTimeMS") + (data.getLong("ptsAdjustment") / 90);
                     boolean durationFlag = eventObj.getBoolean("durationFlag");
                     long breakDuration = durationFlag ? (long) (eventObj.getDouble("breakDuration") / 90) : 0L;
                     if (breakDuration <= 0)
