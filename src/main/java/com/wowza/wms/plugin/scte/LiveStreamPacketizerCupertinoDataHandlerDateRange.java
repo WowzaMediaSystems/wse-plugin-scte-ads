@@ -46,7 +46,7 @@ public class LiveStreamPacketizerCupertinoDataHandlerDateRange extends LiveStrea
 				AMFDataObj eventObj = commandObj.getObject("event");
 				long eventId = eventObj.getLong("eventID");
 				boolean spliceOut = eventObj.getBoolean("outOfNetwork");
-				long ptsAdjustmentMs = data.getLong("ptsAdjustment") / 90;
+				long ptsAdjustmentMs = (long)Math.ceil(data.getDouble("ptsAdjustment") / 90);
 				if (spliceOut)
 				{
 					events.computeIfAbsent(eventId, id -> {
