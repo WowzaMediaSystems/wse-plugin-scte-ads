@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.wowza.util.BufferUtils;
+import com.wowza.util.StringUtils;
 import com.wowza.wms.amf.*;
 import com.wowza.wms.httpstreamer.cupertinostreaming.livestreampacketizer.*;
 import com.wowza.wms.media.mp3.model.idtags.*;
@@ -51,18 +52,23 @@ public abstract class LiveStreamPacketizerCupertinoDataHandler extends LiveStrea
                     getClass().getSimpleName(), stream.getContextStr(), chunk.getRendition(), chunkStartTime, streamStartTime));
         }
 
-        Instant pdt = Instant.ofEpochMilli(streamStartTime + (chunkStartTime - tcOffsets[rendition - 1]));
-        Instant now = Instant.now();
-        Duration diff = Duration.between(pdt, now);
-        if (diff.abs().toMillis() > (long) liveStreamPacketizer.getChunkDurationTarget() * liveStreamPacketizer.getMaxChunkCount())
-        {
-            pdt = now;
-            tcOffsets[rendition - 1] = -1;
-        }
-        String programDateTime = dateTimeFormatter.format(pdt);
-        chunk.setProgramDateTime(programDateTime);
+        // From version 4.11, WSE is setting the programDateTime tag in the chunk, so we only need to set it if it's not already set.
+        String programDateTime = chunk.getProgramDateTime();
+		if (StringUtils.isEmpty(programDateTime))
+		{
+			Instant pdt = Instant.ofEpochMilli(streamStartTime + (chunkStartTime - tcOffsets[rendition - 1]));
+			Instant now = Instant.now();
+			Duration diff = Duration.between(pdt, now);
+			if (diff.abs().toMillis() > (long) liveStreamPacketizer.getChunkDurationTarget() * liveStreamPacketizer.getMaxChunkCount())
+			{
+				pdt = now;
+				tcOffsets[rendition - 1] = -1;
+			}
+			programDateTime = dateTimeFormatter.format(pdt);
+			chunk.setProgramDateTime(programDateTime);
+		}
 
-        ID3Frames id3Header = liveStreamPacketizer.getID3FramesHeader(chunk.getRendition());
+		ID3Frames id3Header = liveStreamPacketizer.getID3FramesHeader(chunk.getRendition());
         if (id3Header != null)
         {
             ID3V2FrameTextInformationUserDefined comment = new ID3V2FrameTextInformationUserDefined();
