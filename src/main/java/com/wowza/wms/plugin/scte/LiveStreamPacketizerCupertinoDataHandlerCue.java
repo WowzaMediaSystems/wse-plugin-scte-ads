@@ -75,9 +75,10 @@ public class LiveStreamPacketizerCupertinoDataHandlerCue extends LiveStreamPacke
             if (event.startTime >= chunk.getStartTimecode() && event.startTime < timecode)
             {
                 String tag = "";
-                if (!disableOATCLSTag)
+                if (!disableOATCLSTag) {
                     tag = String.format("EXT-OATCLS-SCTE35:%s", event.spliceOutData);
-                chunkHeaders.addHeader(tag);
+                    chunkHeaders.addHeader(tag);
+                }
                 String cueOutTag = useDurationInCueOutTag ? "EXT-X-CUE-OUT:DURATION=" : "EXT-X-CUE-OUT:";
                 tag = String.format("%s%.3f", cueOutTag, event.duration / 1000d);
                 chunkHeaders.addHeader(tag);
