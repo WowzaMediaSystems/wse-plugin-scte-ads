@@ -12,10 +12,14 @@ import com.wowza.wms.stream.IMediaStream;
 
 public class LiveStreamPacketizerCupertinoDataHandlerCue extends LiveStreamPacketizerCupertinoDataHandler
 {
+    private boolean disableOATCLSTag = false;
+    private boolean useDurationInCueOutTag = false;
 
     public LiveStreamPacketizerCupertinoDataHandlerCue(LiveStreamPacketizerCupertino liveStreamPacketizer, IMediaStream stream)
     {
         super(liveStreamPacketizer, stream);
+        disableOATCLSTag = liveStreamPacketizer.getProperties().getPropertyBoolean("cueDisableOATCLSTag", disableOATCLSTag);
+        useDurationInCueOutTag = liveStreamPacketizer.getProperties().getPropertyBoolean("cueUseDurationInCueOutTag", useDurationInCueOutTag);
     }
 
     @Override
@@ -70,9 +74,12 @@ public class LiveStreamPacketizerCupertinoDataHandlerCue extends LiveStreamPacke
             // first chunk for event
             if (event.startTime >= chunk.getStartTimecode() && event.startTime < timecode)
             {
-                String tag = String.format("EXT-OATCLS-SCTE35:%s", event.spliceOutData);
+                String tag = "";
+                if (!disableOATCLSTag)
+                    tag = String.format("EXT-OATCLS-SCTE35:%s", event.spliceOutData);
                 chunkHeaders.addHeader(tag);
-                tag = String.format("EXT-X-CUE-OUT:%.3f", event.duration / 1000d);
+                String cueOutTag = useDurationInCueOutTag ? "EXT-X-CUE-OUT:DURATION=" : "EXT-X-CUE-OUT:";
+                tag = String.format("%s%.3f", cueOutTag, event.duration / 1000d);
                 chunkHeaders.addHeader(tag);
             }
             // continuation chunk
