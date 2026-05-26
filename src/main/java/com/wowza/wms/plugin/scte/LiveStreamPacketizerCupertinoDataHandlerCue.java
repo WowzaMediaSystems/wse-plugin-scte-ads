@@ -21,6 +21,11 @@ public class LiveStreamPacketizerCupertinoDataHandlerCue extends LiveStreamPacke
     @Override
     public void onFillChunkDataPacket(LiveStreamPacketizerCupertinoChunk chunk, CupertinoPacketHolder holder, AMFPacket packet, ID3Frames id3Frames)
     {
+        logger.info(String.format("%s.onFillChunkDataPacket [%s]", getClass().getSimpleName(), stream.getContextStr()));
+        if (chunk == null) {
+            logger.info(String.format("%s.onFillChunkDataPacket chunk is null, skipping", getClass().getSimpleName()));
+            return;
+        }
         int rendition = chunk.getRendition().getRendition();
         extractSCTEData(packet, rendition).ifPresent(data -> {
             AMFDataObj commandObj = data.getObject("command");
@@ -54,6 +59,11 @@ public class LiveStreamPacketizerCupertinoDataHandlerCue extends LiveStreamPacke
     @Override
     public void onFillChunkEnd(LiveStreamPacketizerCupertinoChunk chunk, long timecode)
     {
+        logger.info(String.format("%s.onFillChunkEnd [%s] timecode: %d", getClass().getSimpleName(), stream.getContextStr(), timecode));
+        if (chunk == null) {
+            logger.info(String.format("%s.onFillChunkEnd chunk is null, skipping", getClass().getSimpleName()));
+            return;
+        }
         CupertinoUserManifestHeaders chunkHeaders = chunk.getUserManifestHeaders();
         events.forEach((id, event) -> {
             long elapsed = chunk.getStartTimecode() - event.startTime;
