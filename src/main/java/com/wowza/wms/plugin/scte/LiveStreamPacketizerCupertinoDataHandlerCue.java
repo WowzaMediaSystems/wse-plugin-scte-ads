@@ -12,15 +12,24 @@ import com.wowza.wms.stream.IMediaStream;
 
 public class LiveStreamPacketizerCupertinoDataHandlerCue extends LiveStreamPacketizerCupertinoDataHandler
 {
+    private boolean disableOATCLSTag = false;
+    private boolean useDurationInCueOutTag = false;
 
     public LiveStreamPacketizerCupertinoDataHandlerCue(LiveStreamPacketizerCupertino liveStreamPacketizer, IMediaStream stream)
     {
         super(liveStreamPacketizer, stream);
+        disableOATCLSTag = liveStreamPacketizer.getProperties().getPropertyBoolean("cueDisableOATCLSTag", disableOATCLSTag);
+        useDurationInCueOutTag = liveStreamPacketizer.getProperties().getPropertyBoolean("cueUseDurationInCueOutTag", useDurationInCueOutTag);
     }
 
     @Override
     public void onFillChunkDataPacket(LiveStreamPacketizerCupertinoChunk chunk, CupertinoPacketHolder holder, AMFPacket packet, ID3Frames id3Frames)
     {
+        logger.info(String.format("%s.onFillChunkDataPacket [%s]", getClass().getSimpleName(), stream.getContextStr()));
+        if (chunk == null) {
+            logger.info(String.format("%s.onFillChunkDataPacket chunk is null, skipping", getClass().getSimpleName()));
+            return;
+        }
         int rendition = chunk.getRendition().getRendition();
         extractSCTEData(packet, rendition).ifPresent(data -> {
             AMFDataObj commandObj = data.getObject("command");
@@ -54,15 +63,24 @@ public class LiveStreamPacketizerCupertinoDataHandlerCue extends LiveStreamPacke
     @Override
     public void onFillChunkEnd(LiveStreamPacketizerCupertinoChunk chunk, long timecode)
     {
+        logger.info(String.format("%s.onFillChunkEnd [%s] timecode: %d", getClass().getSimpleName(), stream.getContextStr(), timecode));
+        if (chunk == null) {
+            logger.info(String.format("%s.onFillChunkEnd chunk is null, skipping", getClass().getSimpleName()));
+            return;
+        }
         CupertinoUserManifestHeaders chunkHeaders = chunk.getUserManifestHeaders();
         events.forEach((id, event) -> {
             long elapsed = chunk.getStartTimecode() - event.startTime;
             // first chunk for event
             if (event.startTime >= chunk.getStartTimecode() && event.startTime < timecode)
             {
-                String tag = String.format("EXT-OATCLS-SCTE35:%s", event.spliceOutData);
-                chunkHeaders.addHeader(tag);
-                tag = String.format("EXT-X-CUE-OUT:%.3f", event.duration / 1000d);
+                String tag = "";
+                if (!disableOATCLSTag) {
+                    tag = String.format("EXT-OATCLS-SCTE35:%s", event.spliceOutData);
+                    chunkHeaders.addHeader(tag);
+                }
+                String cueOutTag = useDurationInCueOutTag ? "EXT-X-CUE-OUT:DURATION=" : "EXT-X-CUE-OUT:";
+                tag = String.format("%s%.3f", cueOutTag, event.duration / 1000d);
                 chunkHeaders.addHeader(tag);
             }
             // continuation chunk
